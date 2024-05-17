@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>lotteCompany::media</title>
+    <link th:href="@{/css/company.css}" rel="stylesheet">
+    <style>
+        .videoList .item .lotteText {
+            margin-left: 68px;
+        }
+
+    </style>
+
+</head>
+<body>
+<div id="wrapper">
+    <!--🎈header-->
+    <header>
+        <div class="logo">
+            <a th:href="@{/}">
+                <img th:src="@{/images/company/company_index_logo.png}" alt="logo">
+            </a>
+        </div>
+        <div class="gnb">
+            <ul>
+                <li>
+                    <a th:href="@{/company}">HOME</a>
+                </li>
+                <li>
+                    <a th:href="@{/company/culture}">기업문화</a>
+                </li>
+                <li>
+                    <a th:href="@{/company/blog}">소식과 이야기</a>
+                </li>
+                <li>
+                    <a th:href="@{/company/jobPosting}">채용</a>
+                </li>
+                <li>
+                    <a th:href="@{/company/media}">미디어</a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!--🎈main-->
+    <main id="media">
+        <section class="media">
+            <div class="title">
+                <h2>미디어 세상 속 롯데ON을 소개합니다!</h2>
+                <p>더 다양한 LotteON 영상을 소개합니다.</p>
+            </div>
+            <div class="videoList">
+                <div class="item item1 lotteItem">
+                    <div class="video">
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/aXJMb8ONIJ0?si=se6TfJAVRZpuzNoL" title="YouTube video player"
+                                frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="text lotteText">
+                        <h4>#롯데e커머스에는 교복처럼 입는 옷이 있다?! </h4>
+                        <p>#부제목 EP.201 | LotteOn 2024년 05월 01일 방송</p>
+                    </div>
+                </div>
+
+                <div class="item item2">
+                    <div class="video">
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/Q2J-RlhtYcM?si=kroRiFRlqnc5nYkk"
+                                title="YouTube video player" frameborder="0" allow="accelerometer; autoplay;
+                                clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="text">
+                        <h4>#Shopping Fantasy On</h4>
+                        <p>#부제목 EP.201 | LotteOn 2024년 05월 01일 방송</p>
+                    </div>
+                </div>
+
+                <div class="item item3">
+                    <div class="video">
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/Q2J-RlhtYcM?si=kroRiFRlqnc5nYkk"
+                                title="YouTube video player" frameborder="0" allow="accelerometer; autoplay;
+                                clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="text">
+                        <h4>#Shopping Fantasy On</h4>
+                        <p>#부제목 EP.201 | LotteOn 2024년 05월 01일 방송</p>
+                    </div>
+                </div>
+
+                <div class="item item4">
+                    <div class="video">
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/fWSirQdLpWg?si=iScPX3NtTGhp9eBW"
+                                title="YouTube video player" frameborder="0" allow="accelerometer; autoplay;
+                                clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="text">
+                        <h4>#Shopping Fantasy On</h4>
+                        <p>#부제목 EP.201 | LotteOn 2024년 05월 01일 방송</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!--🎈footer-->
+    <footer>
+        <div class="footerBox">
+            <div class="footerTop">
+                <ul>
+                    <li><a th:href="@{/}">HOME</a></li>
+                    <li><a th:href="@{/company/culture}">기업문화</a></li>
+                    <li><a th:href="@{/company/blog}">소식과 이야기</a></li>
+                    <li><a th:href="@{/company/jobPosting}">채용</a></li>
+                    <li><a th:href="@{/company/media}">미디어</a></li>
+                </ul>
+                <p>peoplevalue@lotte.net</p>
+            </div>
+            <div class="footerSns">
+                <a th:href="@{#}"><img th:src="@{/images/company/facebook_50.png}" alt="페이스북"></a>
+                <a th:href="@{#}"><img th:src="@{/images/company/discord_50.png}" alt="디스코드"></a>
+                <a th:href="@{#}"><img th:src="@{/images/company/instagram_50.png}" alt="인스타"></a>
+                <a th:href="@{#}"><img th:src="@{/images/company/twitterx_50.png}" alt="트위터x"></a>
+            </div>
+            <div class="footerBottom">
+                <p>© 2022 All rights Reserved</p>
+            </div>
+        </div>
+    </footer>
+</div>
+</body>
+</html>

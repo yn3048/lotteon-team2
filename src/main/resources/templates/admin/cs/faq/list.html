@@ -1,0 +1,248 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/adminLayout}"
+>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>롯데온::관리자 자주묻는질문 목록</title>
+    <link th:href="@{/admin/css/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+    <link
+            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+    <link th:href="@{/admin/css/sb-admin-2.min.css}" rel="stylesheet">
+    <link th:href="@{/admin/css/admin.css}" rel="stylesheet">
+    <style>
+        .table-bordered td:nth-child(4){
+            text-align: left;
+        }
+        .py-3 h6 {
+            color: #ffffff;
+        }
+    </style>
+
+</head>
+
+<main layout:fragment="content">
+    <script th:src="@{https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js}"></script>
+    <script th:src="@{https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js}"></script>
+    <script>
+        window.onload = function () {
+            const delBtn = document.getElementById('delBtn');
+            const selectAllCheckbox = document.getElementsByName('all')[0];
+            const checkBoxes = document.getElementsByName('checkbox');
+
+            const fdelete = document.getElementById('delete');
+            fdelete.onclick = function (){
+                if (confirm('삭제하시겠습니까?')){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+
+            delBtn.onclick = function(){
+                let Checked = false; // 최소한 하나의 체크박스가 선택되었는지 여부를 나타내는 변수
+                for (let i = 0; i < checkBoxes.length; i++) {
+                    if (checkBoxes[i].checked) {
+                        Checked = true;
+                        break; // 하나라도 체크되어 있으면 반복문 종료
+                    }
+                }
+
+                if (!Checked) {
+                    alert('삭제할 상품을 선택해주세요.');
+                    console.log('check..');
+                    return false;
+                } else {
+                    let confirmed = confirm('정말 삭제하시겠습니까?');
+                    if (!confirmed) {
+                        return false;
+                    }
+                }
+            };
+
+            selectAllCheckbox.addEventListener('change', function () {
+                for (let i = 0; i < checkBoxes.length; i++) {
+                    checkBoxes[i].checked = selectAllCheckbox.checked;
+                }
+            });
+
+        }
+
+        //🎈카테고리 출력
+        $(function (){
+            const jsonData = {};
+
+            // cate1 데이터를 서버에서 불러옴
+            $.ajax({
+                url: '/lotteon/cs/cate1',
+                type: 'GET',
+                data: jsonData,
+                success: function (cate1Data){
+                    console.log(cate1Data);
+
+                    // 문의유형의 select 요소 찾기
+                    const typeSelect = $('select[name="type1"]');
+
+                    // cate1 데이터를 반복하여 1차 선택 옵션 추가
+                    cate1Data.forEach(function (cate1){
+                        typeSelect.append($('<option>', {
+                            value: cate1.cate1,
+                            text: cate1.c1name
+                        }));
+                    });
+                }
+            });
+
+            $('#category1').change(function (){
+                const selectedCategory1 = $(this).val();
+                console.log(selectedCategory1);
+
+                // 1차 카테고리 선택 값을 cate1 input 필드의 값으로 설정
+                $('#cate1').val(selectedCategory1);
+
+                // 1차 카테고리 선택 값(selectedCategory1)을 서버로 전송
+                const jsonData = {
+                    cate1: selectedCategory1
+                };
+
+                $.ajax({
+                    url: '/lotteon/cs/cate2',
+                    type: 'GET',
+                    data: jsonData,
+                    success: function (cate2List){
+                        console.log(cate2List);
+
+                        // 문의유형2 select 요소 찾기
+                        const typeSelect2 = $('select[name="category2"]');
+                        typeSelect2.empty();
+
+                        // cate2 데이터를 반복하여 2차 선택 옵션 추가
+                        cate2List.forEach(function (cate2){
+                            typeSelect2.append($('<option>',{
+                                value: cate2.cate2,
+                                text: cate2.c2name
+                            }));
+                        });
+                        // 2차 카테고리가 업데이트되면 첫번째 옵션 선택
+                        typeSelect2.find('option:first').prop('selected', true);
+                        const firstCate2Value = typeSelect2.val();
+                        $('#cate2').val(firstCate2Value);
+
+                        console.log(typeSelect2);
+                    }
+                });
+            });
+            $('#category2').change(function (){
+                const selectedCategory2 = $(this).val();
+                console.log(selectedCategory2);
+
+                // 2차 카테고리 선택값을 cate2 input 필드의 값으로 설정
+                $('#cate2').val(selectedCategory2);
+            });
+        }); // function 종료
+
+
+
+    </script>
+
+    <div id="faqList" class="container-fluid board">
+
+        <!-- Page Heading -->
+        <h1 class="h3 mb-2 text-gray-800">CS 게시판관리</h1>
+        <p class="mb-4"></p>
+        <!-- DataTales Example -->
+        <div class="card  mb-4">
+            <div class="card-header py-3" >
+                <h6 class="m-0 font-weight-bold ">자주묻는질문</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                            <form th:action="@{/admin/cs/search}" method="get">
+                                <div id="searchBox">
+                                    <input type="hidden" name="cate1" id="cate1" value="" />
+                                    <input type="hidden" name="cate2" id="cate2" value="" />
+                                    <select style="height: 35px; padding: 5px;" name="type1" id="category1">
+                                        <option selected>1차 선택</option>
+                                    </select>
+                                    <select  style="height: 35px; padding: 5px;"  name="category2" id="category2">
+                                        <option selected>2차 선택</option>
+                                    </select>
+                                </div>
+                            </form>
+
+
+                        <form th:action="@{/admin/cs/faq/delete}" method="post">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                <tr class="tableTitle">
+                                    <th>
+                                        <input type="checkbox" name="all">
+                                    </th>
+                                    <th>번호</th>
+                                    <th>유형</th>
+                                    <th>제목</th>
+                                    <th>작성일</th>
+                                    <th>관리</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="faq, index:${faqDTOS}">
+                                    <td>
+                                        <input type="checkbox" name="checkbox" th:value="${faq.faqno}">
+                                    </td>
+                                    <td th:text="${(pageGroupStart -1) * 10 + index.index + 1}" ></td>
+                                    <td th:text="'[' + ${faq.c2name} + ']'"></td>
+                                    <td>
+                                        <a th:href="@{/admin/cs/faq/view(faqno=${faq.faqno}, cate2=${faq.cate2})}">[[${faq.title}]]</a>
+                                    </td>
+                                    <td th:text="${#temporals.format(faq.rdate, 'yyyy-MM-dd')}"></td>
+                                    <td>
+                                        <a th:href="@{/admin/cs/faq/delete(faqno=${faq.faqno})}" id="delete">[삭제]</a>
+                                        <a th:href="@{/admin/cs/faq/modify(faqno=${faq.faqno})}">[수정]</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div>
+                                <input type="submit" id="delBtn" value="선택삭제">
+                                <a th:href="@{/admin/cs/faq/write}" class="btnSubmit">글등록</a>
+                            </div>
+
+                        </form>
+                </div>
+            </div>
+
+
+            <div class="pagination page">
+                <th:block th:if="${pageGroupStart > 1}" th:class="page-item">
+                    <a th:href="@{/admin/cs/faq/list(pg=${pageGroupStart - 1})}" th:class="page-link">이전</a>
+                </th:block>
+
+                <th:block th:each="num:${#numbers.sequence(pageGroupStart, pageGroupEnd)}" th:class="page-item">
+                    <a th:href="@{/admin/cs/faq/list(pg=${num}, cate1=${cate1})}" th:classappend="${num == currentPage} ? 'current num' : 'num'" th:class="page-link">[[${num}]]</a>
+                </th:block>
+
+                <th:block th:if="${pageGroupEnd < lastPageNum}" th:class="page-item">
+                    <a th:href="@{/admin/cs/faq/list(pg=${pageGroupEnd + 1})}" th:class="page-link">다음</a>
+                </th:block>
+            </div>
+            <input type="hidden" th:value="${pageGroupStart}">
+            <input type="hidden" th:value="${pageGroupEnd}">
+            <input type="hidden" th:value="${pageStartNum}">
+
+
+
+        </div>
+
+    </div>
+
+    <script th:src="@{/admin/css/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/admin/css/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/admin/css/vendor/jquery-easing/jquery.easing.min.js}"></script>
+    <script th:src="@{/admin/js/sb-admin-2.min.js}"></script>
+</main>
+
+</html>

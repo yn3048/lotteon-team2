@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html"
+      xmlns:layout="http://www.thymeleaf.org"
+      layout:decorate="~{/layout/csLayout.html}">
+<style>
+  #cs > .notice > .view > article > .content > textarea {
+    resize: none;
+    border: none;
+  }
+</style>
+  <div layout:fragment="content">
+
+      <section id="cs">
+        <div class="notice">
+          <nav>
+            <div>
+              <p>홈<span>></span>공지사항</p>
+            </div>
+          </nav>
+          <section class="view">
+            <aside>
+              <h2>공지사항</h2>
+              <ul>
+                <li th:class="${cate1 == null or cate1 == '' ? 'on' : ''}">
+                  <a th:href="@{/cs/notice/list}">전체</a>
+                </li>
+                <li th:class="${cate1 == '10' ? 'on' : ''}">
+                  <a th:href="@{/cs/notice/list(cate1=10)}">고객서비스</a>
+                </li>
+                <li th:class="${cate1 == '11' ? 'on' : ''}">
+                  <a th:href="@{/cs/notice/list(cate1=11)}">안전거래</a>
+                </li>
+                <li th:class="${cate1 == '12' ? 'on' : ''}">
+                  <a th:href="@{/cs/notice/list(cate1=12)}">위해상품</a>
+                </li>
+                <li th:class="${cate1 == '13' ? 'on' : ''}">
+                  <a th:href="@{/cs/notice/list(cate1=13)}">이벤트당첨</a>
+                </li>
+              </ul>
+            </aside>
+            <article>
+              <nav>
+                <h2 class="title" th:text="'[' + ${noticeBoard.c2name} + ']' + ${noticeBoard.title}"></h2>
+                <span th:text="${#temporals.format(noticeBoard.rdate, 'yyyy-MM-dd')}"></span>
+              </nav>
+
+              <div class="content">
+                <textarea>[[${noticeBoard.content}]]</textarea>
+              </div>
+              <a th:href="@{/cs/notice/list}" id="btnList" class="btnList">목록보기</a>
+            </article>
+          </section>
+        </div>
+      </section>
+
+    </div>
+</html>

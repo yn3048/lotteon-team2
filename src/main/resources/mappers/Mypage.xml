@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.lotteon.mapper.MypageMapper">
+
+    <insert id="insertReview" parameterType="kr.co.lotteon.dto.ReviewDTO">
+        INSERT INTO review (pno, uid, content, rating, redate)
+        VALUES (#{pno}, #{uid}, #{content}, #{rating}, NOW())
+    </insert>
+
+    <select id="selectMyQnaBoard" parameterType="map" resultType="map">
+        SELECT * FROM `qna` AS a JOIN `cate2`
+        AS b ON a.cate1 = b.cate1 AND a.cate2 = b.cate2
+        WHERE `uid`=#{uid} AND `parent`=0 ORDER BY `qnano` DESC LIMIT #{start}, 10;
+    </select>
+
+    <select id="selectMyQnaTotal">
+        SELECT COUNT(*) FROM `qna` WHERE `parent`=0 AND `uid`=#{uid};
+    </select>
+
+    <select id="selectCsQnaComment">
+        SELECT * FROM `qna` AS a JOIN `cate2` AS b ON a.cate1 = b.cate1 AND a.cate2 = b.cate2 WHERE `parent`=#{qnaNo}
+    </select>
+
+    <select id="selectCsQnaCommentView" resultType="kr.co.lotteon.dto.QnaDTO">
+        SELECT * FROM `qna` AS a
+        JOIN `cate1` as b
+        JOIN `cate2` as c
+        ON a.cate1 = c.cate1 AND a.cate2 = c.cate2 AND a.cate1 = b.cate1
+        WHERE `qnano` = #{qnano}
+    </select>
+
+    <select id="selectReviews" resultType="kr.co.lotteon.dto.ReviewDTO">
+        Select a.*, c.pname
+        FROM `review` AS a
+        JOIN `product` AS c ON a.pno = c.pno
+        WHERE a.uid = #{uid}
+        ORDER BY redate DESC
+        LIMIT 3
+    </select>
+
+    <select id="selectC2Name" resultType="String">
+        select c2name
+        from cate2
+        where cate2 = #{cate2}
+    </select>
+
+</mapper>

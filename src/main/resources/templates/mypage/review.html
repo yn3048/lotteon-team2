@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/myLayout}">
+
+<div class="review" layout:fragment="content">
+    <ul>
+        <span class="menu_else"></span>
+        <li><a th:href="@{/mypage/order}">전체주문내역</a></li>
+        <li><a th:href="@{/mypage/point}">포인트내역</a></li>
+        <li><a th:href="@{/mypage/review}">나의리뷰</a></li>
+        <li><a th:href="@{/mypage/qna}">문의하기</a></li>
+        <li>
+            <th:block th:if="${#authentication.principal != 'anonymousUser'}">
+                <th:block th:if="${#authentication.principal.user.role == 'USER'}">
+                    <a th:href="@{/mypage/infoAccessCheck}">나의설정</a>
+                </th:block>
+                <th:block th:if="${#authentication.principal.user.role == 'ADMIN'}">
+                    <a th:href="@{/mypage/infoAccessCheck}">나의설정</a>
+                </th:block>
+                <th:block th:if="${#authentication.principal.user.role == 'SELLER'}">
+                    <a th:href="@{/mypage/infoAccessCheckSeller}">나의설정</a>
+                </th:block>
+            </th:block>
+        </li>
+    </ul>
+
+    <section>
+        <a th:href="@{/}" class="banner" th:each="banner:${banners}" th:if="${banner.blocation.equals('MY1')} and ${banner.bmanage == 1}">
+            <img th:src="@{|/uploads/banner/${banner.bfile}|}">
+        </a>
+        <article>
+            <h3>나의리뷰</h3>
+
+            <table border="0">
+                    <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>상품명</th>
+                        <th>내용</th>
+                        <th>평점</th>
+                        <th>작성일</th>
+                    </tr>
+                    </thead>
+                <tbody>
+                <tr th:each="review, iterStat : ${reviews}">
+                    <td class="no" th:text="${iterStat.count}">5</td>
+                    <td class="prodName" th:text="${review.pname}">
+                        <a th:href="@{/product/view(pno=${review.pno})}" th:text="${review.pname}">상품명</a>
+                    </td>
+                    <td class="content" th:text="${review.content}">배송이 빠릅니다. 잘 사용하겠습니다.</td>
+                    <td class="score">
+                        <span th:classappend="'rating star' + ${review.rating}" th:text="${review.rating}">평점</span>
+                    </td>
+                    <td class="date" th:text="${#temporals.format(review.redate, 'yyyy-MM-dd')}">2024-12-12</td>
+                </tr>
+                </tbody>
+
+            </table>
+        </article>
+    </section>
+</div>
+</html>

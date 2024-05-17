@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/myLayout}">
+
+<div class="info" layout:fragment="content">
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script th:src="@{/js/myInfo.js}"></script>
+    <script th:src="@{/js/myInfoChange.js}"></script>
+
+    <script>
+        const contextPath = "[[${@environment.getProperty('server.servlet.context-path')}]]";
+        const uid = '[[${#authentication.principal.user.uid}]]';
+        const sameHp = "[[${#authentication.principal.user.hp}]]";
+        const sameEmail = "[[${#authentication.principal.user.email}]]";
+        console.log(contextPath);
+        console.log(uid);
+        console.log(sameHp);
+        console.log(sameEmail);
+    </script>
+    <ul>
+        <span class="menu_else"></span>
+        <li><a th:href="@{/mypage/order}">전체주문내역</a></li>
+        <!--<li><a href="./favorite.html">관심상품</a></li>-->
+        <li><a th:href="@{/mypage/point}">포인트내역</a></li>
+        <li><a th:href="@{/mypage/coupon}">쿠폰</a></li>
+        <li><a th:href="@{/mypage/review}">나의리뷰</a></li>
+        <li><a th:href="@{/mypage/qna}">문의하기</a></li>
+        <li>
+            <th:block th:if="${#authentication.principal != 'anonymousUser'}">
+                <th:block th:if="${#authentication.principal.user.role == 'USER'}">
+                    <a th:href="@{/mypage/infoAccessCheck}">나의설정</a>
+                </th:block>
+                <th:block th:if="${#authentication.principal.user.role == 'ADMIN'}">
+                    <a th:href="@{/mypage/infoAccessCheck}">나의설정</a>
+                </th:block>
+                <th:block th:if="${#authentication.principal.user.role == 'SELLER'}">
+                    <a th:href="@{/mypage/infoAccessCheckSeller}">나의설정</a>
+                </th:block>
+            </th:block>
+        </li>
+    </ul>
+    <section>
+        <a th:href="@{/}" class="banner" th:each="banner:${banners}" th:if="${banner.blocation.equals('MY1')} and ${banner.bmanage == 1}">
+            <img th:src="@{|/uploads/banner/${banner.bfile}|}">
+        </a>
+        <article>
+            <h3>회원정보 설정</h3>
+
+            <table border="0">
+                <input type="hidden" name="type" th:value="normal"/>
+                <input type="hidden" name="uid" th:value="${#authentication.principal.user.uid}"/>
+                <input type="hidden" name="name" th:value="${#authentication.principal.user.name}"/>
+                <tr>
+                    <td>사용자 ID</td>
+                    <td>[[${#authentication.principal.user.uid}]]</td>
+                </tr>
+                <tr>
+                    <td>비밀번호</td>
+                    <td>
+                        <button id="btnPassChange">비밀번호 변경</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>이름</td>
+                    <td>[[${#authentication.principal.user.name}]]</td>
+                </tr>
+                <tr>
+                    <td>E-mail</td>
+                    <td>
+                        <div>
+                            <input type="email" id="inputEmail" name="email" th:value="${#authentication.principal.user.email}" />
+                            <button type="button" id="btnEmailCode" class="btnAuth" data-type="findIdEmail">인증번호 받기</button>
+                            <span id="resultEmail"></span>
+                        </div>
+                        <div id="auth" class="auth">
+                            <input type="text" name="auth" id="inputEmailCode" placeholder="인증번호 입력" />
+                            <button type="button" id="btnEmailAuth" class="btnConfirm">확인</button>
+                            <span id="resultEmailCode"></span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>휴대폰</td>
+                    <td>
+                        <p class="hp">
+                            <input type="text" name="hp" th:value="${#authentication.principal.user.hp}" required/>
+                            <span class="msgHp"></span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>주소</td>
+                    <td>
+                        <input type="text" name="zip" id="zip" th:value="${#authentication.principal.user.zip}" placeholder="주소검색 클릭" readonly/>
+                        <button type="button" id="findZip">주소검색</button><br>
+                        <input type="text" name="addr1" id="addr1" th:value="${#authentication.principal.user.addr1}" placeholder="주소를 검색하세요." readonly/><br>
+                        <input type="text" name="addr2" id="addr2" th:value="${#authentication.principal.user.addr2}" placeholder="상세주소를 입력하세요."/><br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>회원탈퇴</td>
+                    <td>
+                        <button id="btnWithdraw">탈퇴하기</button>
+                    </td>
+                </tr>
+            </table>
+            <button id="btnWithdrawFinal">수정 완료</button>
+            <!-- 🎈🎈🎈info - 비밀번호 변경 팝업 -->
+            <div id="popPassChange" class="popup">
+                <div>
+                    <nav>
+                        <h1>비밀번호 변경</h1>
+                        <button class="btnClose">X</button>
+                    </nav>
+                    <section>
+                        <table>
+                            <input type="hidden" name="uid" th:value="${#authentication.principal.user.uid}"/>
+                            <tr>
+                                <th>새 비밀번호</th>
+                                <td>
+                                    <input type="password" name="pass1" placeholder="새 비밀번호 입력"/>
+                                    <span class="msgPass1"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>새 비밀번호 확인</th>
+                                <td>
+                                    <input type="password" name="pass2" placeholder="새 비밀번호 입력 확인"/>
+                                    <span class="msgPass2"></span>
+                                </td>
+                            </tr>
+                        </table>
+                        <p>
+                            비밀번호를 변경해 주세요.<br>
+                            영문, 숫자, 특수문자를 사용하여 8자 이상 입력해 주세요.
+                        </p>
+                        <div>
+                            <button class="btnComplete">완료</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- info - 비밀번호 변경 팝업 끝 -->
+            <!-- info - 회원탈퇴 팝업 -->
+            <div id="popWithdraw" class="popup">
+                <div>
+                    <nav>
+                        <h1>회원 탈퇴</h1>
+                        <button class="btnClose">X</button>
+                    </nav>
+                    <section>
+                        <table>
+                            <input type="hidden" name="uid" th:value="${#authentication.principal.user.uid}"/>
+                            <tr>
+                                <th>비밀번호 입력</th>
+                                <td>
+                                    <input type="password" name="passCheck" placeholder="비밀번호 입력"/>
+                                </td>
+                            </tr>
+                        </table>
+                        <p>
+                            회원 탈퇴 후, 계정 복구는 불가합니다.
+                        </p>
+                        <div>
+                            <button class="btnPopWithdraw">탈퇴하기</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <!-- info - 회원탈퇴 팝업 끝 -->
+        </article>
+    </section>
+
+</div>
+</html>

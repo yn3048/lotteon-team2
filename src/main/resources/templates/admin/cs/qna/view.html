@@ -1,0 +1,292 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/adminLayout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>롯데온::관리자 고객문의 글보기</title>
+    <link th:href="@{/admin/css/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+    <link
+            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+    <link th:href="@{/admin/css/sb-admin-2.min.css}" rel="stylesheet">
+    <script th:src="@{/js/util.js}"></script>
+    <style>
+
+    </style>
+
+</head>
+
+<main layout:fragment="content">
+    <script th:inline="javascript">
+        window.onload = function () {
+
+            // 🎈댓글 삭제/수정(동적 이벤트 처리)
+
+            document.addEventListener('click', async function (e) {
+
+                // 이벤트 대상의 클래스값이 remove일 경우
+                if (e.target.dataset.mode == 'remove') {
+                    e.preventDefault();
+
+                    const result = confirm('정말 삭제 하시겠습니까?');
+                    console.log("result2 : " + result);
+
+                    // 해당 삭제에서 가장 가까운 부모 comment 문서객체 생성
+                    const comment = e.target.closest('.comment');
+
+                    // 댓글 번호
+                    const qnano = e.target.dataset.no;
+
+                    console.log('qnano : ' + qnano);
+
+
+                    // DELETE용 fetch 함수 정의
+                    const data = fetchDelete(`/lotteon/admin/cs/qna/reply/`+qnano);
+
+                    if (data) {
+                        alert("삭제 되었습니다.");
+                        comment.remove();
+                    }
+
+                } else if (e.target.dataset.mode == 'modify') {
+
+                    // 수정모드
+                    const comment = e.target.closest('.comment');
+                    const textarea = comment.getElementsByTagName('textarea')[0];
+                    const btnModify = comment.getElementsByClassName('btnModify')[0];
+                    const btnRemove = comment.getElementsByClassName('btnRemove')[0];
+
+                    console.log(textarea);
+
+                    textarea.readOnly = false;
+                    textarea.style.outline = "1px solid #111"
+                    textarea.focus();
+                    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+                    btnModify.innerText = "수정"
+                    btnModify.dataset.mode = 'update';
+
+                    btnRemove.innerText = "취소"
+                    btnRemove.dataset.mode = 'cancel';
+
+                } else if (e.target.dataset.mode == 'cancel') {
+                    alert("취소!");
+                    const comment = e.target.closest('.comment');
+                    const textarea = comment.getElementsByTagName('textarea')[0];
+                    const btnModify = comment.getElementsByClassName('btnModify')[0];
+                    const btnRemove = comment.getElementsByClassName('btnRemove')[0];
+
+                    textarea.readOnly = true;
+                    textarea.style.outline = 'none';
+                    btnModify.dataset.mode = 'modify';
+                    btnRemove.innerText = "삭제"
+                    btnRemove.dataset.mode = 'remove';
+
+                } else if (e.target.dataset.mode == 'update') {
+
+                    const comment = e.target.closest('.comment');
+                    const textarea = comment.getElementsByTagName('textarea')[0];
+                    const qnano = comment.dataset.no;
+
+                    const jsonData = {
+                        "replyno": e.target.dataset.no,
+                        "qnano": qnano,
+                        "rcontent": textarea.value
+                    }
+
+                    console.log(jsonData);
+
+                    // PUT용 fetch 함수 정의(util.js)
+                    const data = fetchPut(`/lotteon/admin/cs/qna/reply`, jsonData);
+
+                    console.log(data);
+
+                    alert("수정이 완료 되었습니다.");
+                    textarea.readOnly = true;
+                }
+            });
+
+
+            //🎈댓글 불러오기
+            const commentList = document.getElementById('commentList');
+            const commentPlaceholder = document.getElementById('commentPlaceholder');
+
+            // 상단 <script> 선언 태그에 th:inline="javascript" 속성 추가
+            const qnano = [[${qnaBoard.qnano}]];
+
+            // fetchGet 함수는 await 비동기 실행되기 때문에 이벤트 핸들러 function 앞에 async 추가(문법적인 사항)
+            // 페이지 로드 후 바로 댓글목록 데이터를 요청하기 보다는 약간 2초정도 시간 뒤에 요청을 하면 좀더 안정적
+
+            setTimeout(async function () {
+
+                const comments = await fetchGet(`/lotteon/admin/cs/qna/reply/${qnano}`);
+                console.log('comments : ' + comments);
+                commentPlaceholder.remove();
+                for (const comment of comments) {
+                    let commentArticle;
+                    if (document.getElementById('userCheck').value === comment.writer) {
+                        commentArticle = `<div class="mb-3 comment" data-no="${comment.qnano}">
+                                                        <ol class="qna breadcrumb mb-1">
+                                                            <li class="qna breadcrumb-item">${comment.writer}</li>
+                                                            <li class="qna breadcrumb-item">${comment.rdate.substring(0, 10)}</li>
+                                                        </ol>
+
+                                                        <textarea class="qna form-control" rows="3" readonly>${comment.rcontent}</textarea>
+                                                        <div class="text-start mt-1">
+                                                            <button type="button" class="btn qna btn-sm btnModify" data-mode="modify" data-no="${comment.replyno}">수정</button>
+                                                            <button type="button" class="btn qna btn-sm btnRemove" data-mode="remove" data-no="${comment.replyno}">삭제</button>
+                                                        </div>
+                                                    </div>`;
+
+                    } else {
+
+                        commentArticle = `<div class="qna mb-3 comment" data-no="${comment.qnano}">
+                                                        <ol class="qna breadcrumb mb-1">
+                                                            <li class="qna breadcrumb-item">${comment.writer}</li>
+                                                            <li class="qna breadcrumb-item">${comment.rdate.substring(0, 10)}</li>
+                                                        </ol>
+
+                                                        <textarea class="qna form-control" rows="3" readonly>${comment.rcontent}</textarea>
+                                                        <div class="text-end mt-1"></div>
+                                                    </div>`;
+                    }
+
+
+                    // 태그 문자열 삽입
+                    commentList.insertAdjacentHTML('beforeend', commentArticle);
+
+                }
+            }, 2000);
+
+
+            // 🎈댓글 등록
+            const commentForm = document.commentForm;
+            console.log(commentForm);
+            commentForm.onsubmit = async function (e) {
+                e.preventDefault();
+
+                const jsonData = {
+                    "qnano": commentForm.qnano.value,
+                    "writer": commentForm.writer.value,
+                    "rcontent": commentForm.rcontent.value
+                };
+
+                console.log(jsonData);
+
+                // POST용 fetchData 호출(util.js 확인, 기존 fetchData 이름을 fetchGet으로 변경)
+                const data = await fetchPost(`/lotteon/admin/cs/qna/reply`, jsonData);
+                console.log(data);
+
+                // 댓글목록 동적처리
+                const commentArticle = `<div class="mb-3 comment" data-no="${data.qnano}">
+                                            <ol class="qna breadcrumb mb-1">
+                                                <li class="qna breadcrumb-item">${data.writer}</li>
+                                                <li class="qna breadcrumb-item">${data.rdate.substring(0, 10)}</li>
+                                            </ol>
+
+                                            <textarea class="qna form-control" rows="3" readonly>${data.rcontent}</textarea>
+                                            <div class="text-start mt-1">
+                                                <button type="button" class="qna btn btnModify btn-sm" data-no="${data.qnano}">수정</button>
+                                                <button type="button" class="qna btn btnRemove btn-sm" data-no="${data.qnano}">삭제</button>
+                                            </div>
+                                        </div>`;
+
+                // 태그 문자열 삽입
+                commentList.insertAdjacentHTML('beforeend', commentArticle);
+            }
+
+        }
+    </script>
+
+    <section id="adminBoard">
+        <div class="board qna">
+            <div class="view">
+                <h2>1:1 문의</h2>
+                <article>
+                    <nav>
+                        <h2 class="title" th:text="'[' + ${qnaBoard.c2name} + ']' + ${qnaBoard.title}"></h2>
+                        <p>
+                            <span th:text="${#strings.substring(qnaBoard.uid, 0, 3) + '***'}"></span>
+                            <span th:text="${#temporals.format(qnaBoard.rdate, 'yyyy-MM-dd')}"></span>
+                        </p>
+                    </nav>
+                    <div class="content">
+                        <p>
+                            [[${qnaBoard.content}]]
+                        </p><br><br>
+                        <p class="warningText">
+                            ※ 피싱 관련 피해신고<br/><br/>
+                            ▶ 경찰청 사이버수사국 (국번없이)182 :
+                            http://cyberbureau.police.go.kr<br/>
+                            ▶ KISA 인터넷침해대응센터 (국번없이)118 :
+                            http://www.krcert.or.kr<br/>
+                            감사합니다.<br/>
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="bottomBtn">
+            <a th:href="@{/admin/cs/qna/list}" class="listBtn">목록</a>
+            <a th:href="@{/admin/cs/qna/modify(qnano=${qnaBoard.qnano})}" id="modifyBtn">수정</a>
+            <a th:href="@{/admin/cs/qna/delete(qnano=${qnaBoard.qnano})}" class="deleteBtn">삭제</a>
+        </div>
+
+    </section>
+
+    <!--🎈답변목록 시작-->
+
+    <div id="commentList" >
+        <label class="form-label fw-bold"></label>
+
+        <!--
+            처음 글을 불러올때 댓글은 플레이스홀더로 표시하고 이후 AJAX(fetch)로
+            댓글 불러와서 플레이스홀더를 제거하고 댓글을 출력
+        -->
+
+        <div class="mb-3 placeholder-glow" id="commentPlaceholder">
+            <ol class="qna breadcrumb mb-1">
+                <li class="qna breadcrumb-item bg-secondary placeholder col-1 me-1"></li>
+                <li class="qna breadcrumb-item bg-secondary placeholder col-1"></li>
+            </ol>
+
+            <textarea class="qna form-control bg-secondary placeholder" rows="3" readonly></textarea>
+            <div class="text-start mt-1">
+                <button type="button" class="qna btn btnModify btn-sm placeholder disabled col-1"></button>
+                <button type="button" class="qna btn btnRemove btn-sm placeholder disabled col-1"></button>
+            </div>
+        </div>
+    </div>
+
+
+    <!--🎈답변Form-->
+
+    <form name="commentForm">
+        <input type="hidden" name="qnano" th:value="${qnaBoard.qnano}">
+        <input type="hidden" name="cate2" th:value="${qnaBoard.cate2}">
+        <div th:if="${#authorization.expression('isAuthenticated()')}">
+            <input type="hidden" id="userCheck" name="writer" th:value="${#authentication.principal.user.uid}">
+        </div>
+
+        <div class="qna input-group">
+            <span class="qna input-group-text">답변입력</span>
+            <textarea class="qna text-area" name="rcontent" rows="5" cols="100"></textarea>
+        </div>
+
+        <div class="qna btnSet">
+            <input type="submit" class="qna submitBtn" value="등록"/>
+            <button type="button" class="btn qna btn-danger">취소</button>
+        </div>
+    </form>
+
+
+    <script th:src="@{/admin/css/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/admin/css/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/admin/css/vendor/jquery-easing/jquery.easing.min.js}"></script>
+    <script th:src="@{/admin/js/sb-admin-2.min.js}"></script>
+</main>
+
+</html>

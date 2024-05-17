@@ -1,0 +1,325 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/UserLayout}">
+
+
+<!-- 주문 페이지 시작-->
+<section class="order" layout:fragment="content">
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script th:inline="javascript">
+        window.onload = function () {
+
+            document.getElementById('order').onclick = function(event) {
+                const checkedProducts = document.querySelectorAll('input[name="checkbox"]:checked');
+                if (checkedProducts.length === 0) {
+                    event.preventDefault();
+                    alert("상품이 없습니다.");
+                    return false;
+                }
+            };
+
+            // 주소 API 호출
+            document.getElementById('btnZip').onclick = function (e) {
+                e.preventDefault();
+                postcode();
+            }
+
+            document.getElementById('usePoint').onclick = function (e) {
+                e.preventDefault();
+                const point = document.getElementById('point').value;
+                console.log(point);
+                if (parseInt(point) < 5000 || point == "") {
+                    alert("포인트 5,000점 이상이면 현금처럼 사용 가능합니다.");
+                    return false;
+                } else {
+                    if (point > [[${user.point}]]) {
+                        alert("보유하신 포인트를 초과하였습니다.");
+                        return false;
+                    }
+                    const finalPriceText = document.getElementById('finalPrice').innerText
+                    const priceArr = finalPriceText.split(',');
+                    let finalPrice = "";
+                    priceArr.forEach(function (price){
+                        finalPrice += price;
+                    });
+                    console.log(finalPrice);
+                    if(point > parseInt(finalPrice)){
+                        alert("결제 금액 이상으로 포인트 사용은 불가능합니다.");
+                        return false;
+                    }
+                    document.getElementById('discountPoint').innerText = '-' + point;
+                    document.getElementsByName('usepoint')[0].value = point;
+                    setting();
+                }
+            }
+            const selectAllCheckbox = document.getElementById('allCheckbox');
+            const check = document.getElementsByName('checkbox');
+
+            selectAllCheckbox.addEventListener('change', function () {
+                for (let i = 0; i < check.length; i++) {
+                    check[i].checked = selectAllCheckbox.checked;
+                    setting();
+                }
+            });
+
+            for (let i = 0; i < check.length; i++) {
+                check[i].addEventListener('change', function (e) {
+                    selectAllCheckbox.checked = false;
+                    setting();
+                });
+            }
+
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            function setting() {
+                const checked = document.getElementsByName('checkbox');
+                const count = document.getElementsByClassName('count');
+                const price = document.getElementsByClassName('price');
+                const discount = document.getElementById('discountPoint');
+                const point = document.getElementsByClassName('point');
+                const delivery = document.getElementsByClassName('delivery');
+                const calcPrice = document.getElementsByClassName('calcPrice');
+                let countSum = 0;
+                let priceSum = 0;
+                let pointSum = 0;
+                let calcPriceSum = 0;
+                let deliPriceSum = 0;
+                let discountPrice = 0;
+                for (let i = 0; i < count.length; i++) {
+                    if (checked[i].checked) {
+                        const countNum = parseInt(count[i].innerText);
+                        const priceNum = parseInt(price[i].getAttribute('value'));
+                        const calcPriceNum = parseInt(calcPrice[i].getAttribute('value'));
+                        const pointNum = parseInt(point[i].innerText);
+                        countSum += countNum;
+                        priceSum += priceNum * countNum;
+                        pointSum += pointNum * countNum;
+                        calcPriceSum += calcPriceNum;
+                        console.log(pointSum);
+                        if (delivery[i].innerText === "무료배송") {
+                            deliPriceSum += 0;
+                        } else {
+                            deliPriceSum += parseInt(delivery[i].innerText);
+                        }
+                        discountPrice += (priceNum * countNum) - calcPriceNum;
+                    }
+                }
+                const finalPrice = calcPriceSum - deliPriceSum + parseInt(discount.innerText);
+
+                document.getElementById('count').innerText = countSum + ' 건';
+                document.getElementById('price').innerText = formatNumber(priceSum) + '원';
+                document.getElementById('discount').innerText = '-' + formatNumber(discountPrice) + '원';
+                document.getElementById('savePoint').innerText = formatNumber(pointSum) + '원';
+                document.getElementById('delivery').innerText = formatNumber(deliPriceSum) + '원';
+                document.getElementById('finalPrice').innerText = formatNumber(finalPrice) + '원';
+                document.getElementsByName('total')[0].value = finalPrice;
+                document.getElementsByName('savepoint')[0].value = pointSum;
+
+            }
+            document.getElementsByName('usepoint')[0].value = 0;
+            setting();
+        }
+    </script>
+    <!-- 제목, 페이지 네비게이션 -->
+    <nav>
+        <h1>주문결제</h1>
+        <p>
+            HOME > 장바구니 > <strong>주문결제</strong>
+        </p>
+    </nav>
+
+    <form th:action="@{/product/order}" method="post">
+        <!-- 주문 상품 목록 -->
+        <table>
+            <thead>
+            <tr>
+                <td><input type="checkbox" id="allCheckbox" checked></td>
+                <th>상품명</th>
+                <th>총수량</th>
+                <th>판매가</th>
+                <th>할인가</th>
+                <th>적립 포인트</th>
+                <th>배송비</th>
+                <th>소계</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${cartProducts == null or cartProducts.isEmpty()}" class="empty">
+                <td colspan="8">장바구니에 상품이 없습니다.</td>
+            </tr>
+            <tr th:each="product : ${cartProducts}" th:unless="${cartProducts == null or cartProducts.isEmpty()}">
+                <td>
+                    <input type="checkbox" name="checkbox" th:value="${product.pno} + '%' + ${product.pcount} + '%' + ${product.price} + '%' + ${product.options.replace(',', '|')}" checked>
+                </td>
+                <td>
+                    <article>
+                        <a th:href="@{/product/view(pno=${product.pno})}">
+                            <img th:src="@{|/product/${product.cate}/${product.mainimg}|}" alt="상품이미지">
+                        </a>
+                        <div>
+                            <h2 class="name" th:text="${product.pname}">
+                                <a th:href="@{/product/view(pno=${product.pno})}">상품명</a>
+                            </h2>
+                            <p th:text="${product.info}">상품설명</p>
+                            <p th:text="${product.options}">상품설명</p>
+                        </div>
+                    </article>
+                </td>
+                <td class="count" th:text="${product.pcount}">1</td>
+                <td class="price" th:value="${#numbers.formatInteger(product.price, 0)}"
+                    th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')}">27,000
+                </td>
+                <td class="discount" th:text="${product.discount + '%'}">5%</td>
+                <td class="point" th:text="${#numbers.formatInteger(product.point, 0, 'COMMA')}">270</td>
+                <td class="delivery" th:text="${product.deliprice == 0 ? '무료배송' : product.deliprice + '원'}">무료배송</td>
+                <td class="calcPrice"
+                    th:value="${#numbers.formatInteger((product.price * product.pcount) * (1 - product.discount / 100.0), 0)}"
+                    th:text="${#numbers.formatInteger((product.price * product.pcount) * (1 - product.discount / 100.0), 0, 'COMMA')}">
+                    27,000
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- 최종 결제 정보 -->
+        <div class="final">
+            <h2>최종결제 정보</h2>
+            <table border="0">
+                <tr>
+                    <td>총</td>
+                    <td id="count">2 건</td>
+                </tr>
+                <tr>
+                    <td>상품금액</td>
+                    <td id="price">27,000</td>
+                </tr>
+                <tr>
+                    <td>할인금액</td>
+                    <td id="discount">-1,000</td>
+                </tr>
+                <tr>
+                    <td>배송비</td>
+                    <td id="delivery">0</td>
+                </tr>
+                <tr>
+                    <td>포인트 할인</td>
+                    <td id="discountPoint">0</td>
+                </tr>
+                <tr>
+                    <td>적립 예정 포인트</td>
+                    <td id="savePoint">0</td>
+                </tr>
+                <tr>
+                    <td>전체주문금액</td>
+                    <td id="finalPrice">25,000</td>
+                </tr>
+            </table>
+            <input type="hidden" name="usepoint">
+            <input type="hidden" name="total">
+            <input type="hidden" name="savepoint">
+            <input type="hidden" name="uid" th:value="${user.uid}">
+            <input type="submit" id="order" value="결제하기">
+        </div>
+
+        <!-- 배송정보 -->
+        <article class="delivery">
+            <h1>배송정보</h1>
+            <table>
+                <tr>
+                    <td>주문자</td>
+                    <td><input type="text" th:value="${user.name}" readonly/></td>
+                </tr>
+                <tr>
+                    <td>휴대폰</td>
+                    <td>
+                        <input type="text" th:value="${user.hp}" name="hp" readonly/>
+                        <span>- 포함 입력</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>받는분</td>
+                    <td><input type="text" name="receiver" required/></td>
+                </tr>
+                <tr>
+                    <td>우편번호</td>
+                    <td>
+                        <input type="text" id="inputZip" name="zip" required/>
+                        <input type="button" id="btnZip" value="검색"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>기본주소</td>
+                    <td>
+                        <input type="text" id="addr1" name="addr1" required/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>상세주소</td>
+                    <td>
+                        <input type="text" id="addr2" name="addr2" required/>
+                    </td>
+                </tr>
+            </table>
+        </article>
+
+        <!-- 할인정보 -->
+        <article class="discount">
+            <h1>할인정보</h1>
+
+            <div>
+                <p>현재 포인트 : <span>[[${user.point}]]</span>점</p>
+                <label>
+                    <input type="text" id="point" name="point"/>점
+                    <input type="button" id="usePoint" value="적용"/>
+                </label>
+                <span>포인트 5,000점 이상이면 현금처럼 사용 가능합니다.</span>
+            </div>
+        </article>
+
+        <!-- 결제방법 -->
+        <article class="payment">
+            <h1>결제방법</h1>
+            <div>
+                <span>신용카드</span>
+                <p>
+                    <label><input type="radio" name="payment" value="신용카드" required/>신용카드 결제</label>
+                    <label><input type="radio" name="payment" value="체크카드"/>체크카드 결제</label>
+                </p>
+            </div>
+            <div>
+                <span>계좌이체</span>
+                <p>
+                    <label><input type="radio" name="payment" value="실시간 계좌이체"/>실시간 계좌이체</label>
+                    <label><input type="radio" name="payment" value="무통장 입금"/>무통장 입금</label>
+                </p>
+            </div>
+            <div>
+                <span>기타</span>
+                <p>
+                    <label><input type="radio" name="payment" value="휴대폰결제"/>휴대폰결제</label>
+                    <label>
+                        <input type="radio" name="payment" value="카카오페이"/>카카오페이
+                        <img src="../images/ico_kakaopay.gif" alt="카카오페이"/>
+                    </label>
+                </p>
+            </div>
+        </article>
+
+        <!-- 경고 -->
+        <article class="alert">
+            <ul>
+                <li>
+                    <span>롯데ON의 모든 판매자는 안전거래를 위해 구매금액, 결제수단에 상관없이 모든거래에 대하여 롯데ON 유한책임회사의 구매안전서비스(에스크로)를 제공하고 있습니다.</span>
+                </li>
+                <li><span>롯데ON 유한책임회사의 전자금융거래법에 의해 결제대금예치업 등록번호는 02-006-00008 입니다.</span></li>
+                <li><span>등록여부는 금융감독원 홈페이지(www.fss.or.kr)의 업무자료>인허가업무안내>전자금융업등록현황에서 확인하실수 있습니다.</span></li>
+            </ul>
+        </article>
+
+    </form>
+
+</section>
+<!-- 주문 페이지 끝-->
+</html>

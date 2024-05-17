@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>lotteCompany::jobPosting</title>
+    <link th:href="@{/css/company.css}" rel="stylesheet">
+
+</head>
+<body>
+<div id="wrapper" class="jobPosting">
+    <!--🎈header-->
+    <header>
+        <div class="logo">
+            <a th:href="@{/}">
+                <img th:src="@{/images/company/company_index_logo.png}" alt="logo">
+            </a>
+        </div>
+        <div class="gnb">
+            <ul>
+                <li>
+                    <a th:href="@{/company}">HOME</a>
+                </li>
+                <li>
+                    <a th:href="@{/company/culture}">기업문화</a>
+                </li>
+                <li>
+                    <a th:href="@{/company/blog}">소식과 이야기</a>
+                </li>
+                <li>
+                    <a th:href="@{/company/jobPosting}">채용</a>
+                </li>
+                <li>
+                    <a th:href="@{/company/media}">미디어</a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!--🎈main-->
+    <main id="jobPosting">
+        <section class="job">
+            <div class="textBox">
+                <h2>쇼핑을 새롭게, 세상을 이롭게 이끌<br>
+                    쇼핑 좀 해 본 인재를 모십니다!
+                </h2>
+                <p>
+                    롯데ON은안정성있고혁신성있게우리의문화를만들어가고있어요.<br>
+                    구성원들은수평적이고자율적인문화속에서개선을넘어서혁신적인롯데ON만의서비스를만들어요.<br>
+                    롯데ON과함께굵은점을찍어가며성장하실분들을기다립니다.<br>
+                </p>
+            </div>
+            <div class="list">
+                <div>
+                    <table>
+                        <tr>
+                            <td>1</td>
+                            <td>광고사업</td>
+                            <td>경력 4~15년</td>
+                            <td>정규직</td>
+                            <td>광고 플랫폼 기획</td>
+                            <td>모집 중</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>IT</td>
+                            <td>경력 2~15년</td>
+                            <td>정규직</td>
+                            <td>IT 인재 상시 영입(경력)</td>
+                            <td>모집 중</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>IT</td>
+                            <td>경력 2~15년</td>
+                            <td>정규직</td>
+                            <td>IT 인재 상시 영입(경력)</td>
+                            <td>모집 중</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>IT</td>
+                            <td>경력 2~15년</td>
+                            <td>정규직</td>
+                            <td>IT 인재 상시 영입(경력)</td>
+                            <td>모집 중</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>IT</td>
+                            <td>경력 2~15년</td>
+                            <td>정규직</td>
+                            <td>IT 인재 상시 영입(경력)</td>
+                            <td>모집 중</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!--🎈footer-->
+    <footer>
+        <div class="footerBox">
+            <div class="footerTop">
+                <ul>
+                    <li><a th:href="@{/}">HOME</a></li>
+                    <li><a th:href="@{/company/culture}">기업문화</a></li>
+                    <li><a th:href="@{/company/blog}">소식과 이야기</a></li>
+                    <li><a th:href="@{/company/jobPosting}">채용</a></li>
+                    <li><a th:href="@{/company/media}">미디어</a></li>
+                </ul>
+                <p>peoplevalue@lotte.net</p>
+            </div>
+            <div class="footerSns">
+                <a th:href="@{#}"><img th:src="@{/images/company/facebook_50.png}" alt="페이스북"></a>
+                <a th:href="@{#}"><img th:src="@{/images/company/discord_50.png}" alt="디스코드"></a>
+                <a th:href="@{#}"><img th:src="@{/images/company/instagram_50.png}" alt="인스타"></a>
+                <a th:href="@{#}"><img th:src="@{/images/company/twitterx_50.png}" alt="트위터x"></a>
+            </div>
+            <div class="footerBottom">
+                <p>© 2022 All rights Reserved</p>
+            </div>
+        </div>
+    </footer>
+</div>
+</body>
+</html>

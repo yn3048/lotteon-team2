@@ -1,0 +1,211 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/UserLayout}">
+
+<section class="list" layout:fragment="content">
+
+    <script th:inline="javascript">
+        window.onload = function (){
+            if([[${param.cate}]] != null){
+                const paramCate = parseInt([[${param.cate}]]);
+                const cateMap = document.getElementById('cate');
+
+                const cateList = [[${cate}]];
+
+                if (paramCate % 100 !== 0){
+                    const typeA = cateList[Math.floor(paramCate/10000)-1].cname;
+                    const typeB = cateList[Math.floor(paramCate/10000)-1].children[Math.floor((paramCate % 10000)/100)-1].cname;
+                    const typeC = cateList[Math.floor(paramCate/10000)-1].children[Math.floor((paramCate % 10000)/100)-1].children[Math.floor((paramCate % 100))-1].cname;
+                    const span = document.createElement('span');
+                    span.innerText = typeA;
+                    cateMap.appendChild(span);
+                    cateMap.innerText += " > ";
+                    span.innerText = typeB;
+                    cateMap.appendChild(span);
+                    cateMap.innerText += " > ";
+                    span.innerText = typeC;
+                    cateMap.appendChild(span);
+
+                }else if(paramCate % 10000 !== 0){
+                    const typeA = cateList[Math.floor(paramCate/10000)-1].cname;
+                    const typeB = cateList[Math.floor(paramCate/10000)-1].children[Math.floor((paramCate % 10000)/100)-1].cname;
+                    const span = document.createElement('span');
+                    span.innerText = typeA;
+                    cateMap.appendChild(span);
+                    cateMap.innerText += " > ";
+                    span.innerText = typeB;
+                    cateMap.appendChild(span);
+                }else{
+                    const typeA = cateList[Math.floor(paramCate/10000)-1].cname;
+                    const span = document.createElement('span');
+                    span.innerText = typeA;
+                    cateMap.appendChild(span);
+                }
+            }
+
+            let Top = document.getElementById('top');
+
+            if (Top) {
+                Top.style.display = 'none'
+                window.addEventListener('scroll', function () {
+                    if (window.scrollY > 300) {
+                        Top.style.display = 'block';
+                        console.log(Top);
+                    } else {
+                        Top.style.display = 'none';
+                    }
+                });
+
+                Top.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.scrollTo({top: 0, behavior: 'smooth'});
+                    console.log(Top);
+                });
+            } else {
+                console.log("#top 요소를 찾을 수 없습니다.");
+            }
+        }
+    </script>
+    <!-- 제목, 페이지 네비게이션 -->
+    <nav>
+        <h1>상품목록</h1>
+        <p id="cate">HOME >  </p>
+    </nav>
+
+    <!-- 검색결과 그룹박스(검색 있을때만 출력하게) -->
+    <div th:if="${search != null and search != '' and not #lists.isEmpty(page)}" class="group">
+        <h3><strong>검색결과</strong> <em>(총&nbsp;:&nbsp;<span th:text="${page.totalElements}"></span>&nbsp;건)</em></h3>
+        <form action="#" th:action="@{/product/search}" method="get">
+            <input type="text" name="search" th:value="${search}" placeholder="검색어를 입력하세요"/>
+            <input type="submit" value="검색"/>
+            <span>
+            <label><input type="checkbox" name="chk" value="상품명" checked>상품명</label>
+            <label><input type="checkbox" name="chk" value="상품설명">상품설명</label>
+            <label><input type="checkbox" name="chk" value="상품가격">상품가격</label>
+            <input type="text" name="min" placeholder="최소 가격"/>원&nbsp;~&nbsp;<input type="text" name="max"
+                                                                                    placeholder="최대 가격"/>원
+        </span>
+        </form>
+        <p class="info">
+            상세검색을 선택하지 않거나, 상품가격을 입력하지 않으면 현재 결과내에서 검색합니다.<br>
+            검색어는 최대 10글자까지, 여러 개의 검색어를 공백으로 구분하여 입력할 수 있습니다.
+        </p>
+    </div>
+    <!-- 상품목록 -->
+    <div class="prodList">
+        <div class="item" th:each="product : ${products}" th:if="${product.deldate} == null">
+            <div class="imgBox">
+                <a th:href="@{/product/view(pno=${product.pno})}" class="thumb">
+                    <img th:src="@{|/product/${product.cate}/${product.mainimg}|}" alt="상품이미지">
+                    <div class="hover_text">
+                        <p>자세히보기 +</p>
+                    </div>
+                </a>
+            </div>
+            <div class="titleBox">
+                <h3 class="name" th:text="${product.pname}">상품명</h3>
+                <a th:href="@{/product/view(pno=${product.pno})}" class="desc" th:text="${product.info}">상품설명</a>
+            </div>
+            <div class="price">
+                <ul>
+                    <li>
+                        <!-- 할인된 가격을 계산하고 콤마 포맷을 적용합니다. -->
+                        <ins class="dis-price"
+                             th:text="${#numbers.formatInteger((product.price * (1 - product.discount / 100.0)), 3, 'COMMA') + '원'}">
+                            할인된 가격
+                        </ins>
+                    </li>
+                    <li>
+                        <!-- 원래 가격에 콤마 포맷을 적용합니다. -->
+                        <del class="org-price" th:text="${#numbers.formatInteger(product.price, 3, 'COMMA') + '원'}">
+                            30,000
+                        </del>
+                        <!-- 할인율 -->
+                        <span class="discount" th:text="${product.discount + '%'}">10%</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="sellerInfo">
+                <!-- 회사 (판매자 정보) -->
+                <!--<h4 class="seller" th:text="${product.company}"><i class="fas fa-home"></i>판매자</h4>-->
+                <!-- 판매자 등급 및 평점은 데모 데이터이며, 실제 필드가 없습니다. -->
+                <h5 class="badge power">판매자등급</h5>
+            </div>
+        </div>
+
+
+
+        <div class="item" th:each="product : ${products}" th:if="${product.deldate} != null">
+            <div class="imgBox">
+                <a th:href="@{/product/list(cate=${result1.cate})}" class="thumb">
+                    <img th:src="@{|/product/${product.cate}/${product.mainimg}|}" alt="상품이미지">
+                    <div class="hover_text">
+                        <p>자세히보기 +</p>
+                    </div>
+                </a>
+            </div>
+            <div class="titleBox">
+                <h3 class="name" th:text="${product.pname}">상품명</h3>
+                <a th:href="@{/product/list(cate=${result1.cate})}" th:style="${product.deldate != null ? 'color:red':''}" class="desc">삭제된 상품 입니다.</a>
+            </div>
+            <div class="price">
+                <ul>
+                    <li>
+                        <!-- 할인된 가격을 계산하고 콤마 포맷을 적용합니다. -->
+                        <ins class="dis-price"
+                             th:text="${#numbers.formatInteger((product.price * (1 - product.discount / 100.0)), 3, 'COMMA') + '원'}">
+                            할인된 가격
+                        </ins>
+                    </li>
+                    <li>
+                        <!-- 원래 가격에 콤마 포맷을 적용합니다. -->
+                        <del class="org-price" th:text="${#numbers.formatInteger(product.price, 3, 'COMMA') + '원'}">
+                            30,000
+                        </del>
+                        <!-- 할인율 -->
+                        <span class="discount" th:text="${product.discount + '%'}">10%</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="sellerInfo">
+                <!-- 회사 (판매자 정보) -->
+                <!--<h4 class="seller" th:text="${product.company}"><i class="fas fa-home"></i>판매자</h4>-->
+                <!-- 판매자 등급 및 평점은 데모 데이터이며, 실제 필드가 없습니다. -->
+                <h5 class="badge power">판매자등급</h5>
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+    <!-- 상품목록 페이지번호 -->
+    <div class="paging" th:if="${!result1.dtoList.isEmpty()}">
+        <!-- 이전 페이지 링크 -->
+        <span class="prev" th:if="${result1.prev}">
+      <a th:if="${result1.keyword == null}" th:href="@{/product/list(cate=${result1.cate}, pg=${result1.start - 1})}">&lt; 이전</a>
+      <a th:if="${result1.keyword != null}" th:href="@{/product/list(cate=${result1.cate}, pg=${result1.start - 1},
+                                                                type=${result1.type}, ketword=${result1.keyword})}">&lt; 이전</a>
+    </span>
+
+        <!-- 숫자 페이지 링크 -->
+        <span class="num" th:each="n : ${#numbers.sequence(result1.start, result1.end)}">
+      <a th:if="${result1.keyword == null}" th:href="@{/product/list(cate=${result1.cate}, pg=${n})}"
+         th:classappend="${result1.pg == n} ? 'pageOn' : 'page-link'" th:text="${n}"></a>
+      <a th:if="${result1.keyword != null}" th:href="@{/product/list(cate=${result1.cate}, pg=${n}, type=${result1.type}, keyword=${result1.keyword})}"
+         th:classappend="${result1.pg == n} ? 'pageOn' : 'page-link'" th:text="${n}"></a>
+  </span>
+
+        <!-- 다음 페이지 링크 -->
+        <span class="next" th:if="${result1.next}">
+    <a th:if="${result1.keyword == null}" th:href="@{/product/list(cate=${result1.cate}, pg=${result1.end + 1})}">&lt; 다음</a>
+      <a th:if="${result1.keyword != null}" th:href="@{/product/list(cate=${result1.cate}, pg=${result1.end + 1},
+                                                                type=${result1.type}, ketword=${result1.keyword})}">&lt; 다음</a>
+    </span>
+    </div>
+
+
+
+</section>
+</html>

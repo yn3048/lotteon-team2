@@ -1,0 +1,80 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/adminLayout}"
+>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>롯데온::관리자 공지사항 글쓰기</title>
+    <link th:href="@{/admin/css/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+    <link
+            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+    <link th:href="@{/admin/css/sb-admin-2.min.css}" rel="stylesheet">
+
+</head>
+
+<main layout:fragment="content">
+    <script>
+        window.onload = function (){
+            const btnSubmit = document.getElementById('btnSubmit');
+            btnSubmit.onclick = function (e){
+                e.preventDefault();
+                document.formWrite.submit();
+            }
+        }
+    </script>
+
+    <section id="adminBoard">
+        <div class="board notice">
+            <div class="write">
+
+                <article>
+                    <form th:action="@{/admin/cs/notice/write}" name="formWrite" method="post" >
+                        <table>
+                            <tr>
+                                <td>공지사항 유형</td>
+                                <td>
+                                    <select name="cate1" id="category1">
+                                        <option selected>전체</option>
+                                        <option value="10">고객서비스</option>
+                                        <option value="11">안전거래</option>
+                                        <option value="12">위해상품</option>
+                                        <option value="13">이벤트당첨</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>제목</td>
+                                <td>
+                                    <input type="text" class="title" name="title" placeholder="제목을 입력하세요."/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>내용</td>
+                                <td>
+                                    <textarea class="contentText" name="content" placeholder="내용을 입력하세요."></textarea>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </article>
+            </div>
+        </div>
+
+        <div class="bottomBtn">
+            <a th:href="@{/admin/cs/notice/list}" style="background-color:tomato" class="listbtn">취소</a>
+            <a th:href="@{#}" id="btnSubmit">등록</a>
+        </div>
+    </section>
+
+
+
+    <script th:src="@{/admin/css/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/admin/css/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/admin/css/vendor/jquery-easing/jquery.easing.min.js}"></script>
+    <script th:src="@{/admin/js/sb-admin-2.min.js}"></script>
+</main>
+
+</html>

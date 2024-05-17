@@ -1,0 +1,190 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/adminLayout}"
+>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>롯데온::관리자 공지사항 목록</title>
+    <link th:href="@{/admin/css/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+    <link
+            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+    <link th:href="@{/admin/css/sb-admin-2.min.css}" rel="stylesheet">
+    <link th:href="@{/admin/css/admin.css}" rel="stylesheet">
+    <style>
+        .table-bordered td:nth-child(4){
+            text-align: left;
+        }
+
+        .py-3 h6 {
+            color: #ffffff;
+        }
+    </style>
+
+</head>
+
+<main layout:fragment="content">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        window.onload = function () {
+            const delBtn = document.getElementById('delBtn');
+            const selectAllCheckbox = document.getElementsByName('all')[0];
+            const checkBoxes = document.getElementsByName('checkbox');
+
+            const fdelete = document.getElementById('delete');
+            fdelete.onclick = function (){
+                if (confirm('삭제하시겠습니까?')){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+
+            delBtn.onclick = function(){
+                let Checked = false; // 최소한 하나의 체크박스가 선택되었는지 여부를 나타내는 변수
+                for (let i = 0; i < checkBoxes.length; i++) {
+                    if (checkBoxes[i].checked) {
+                        Checked = true;
+                        break; // 하나라도 체크되어 있으면 반복문 종료
+                    }
+                }
+
+                if (!Checked) {
+                    alert('삭제할 상품을 선택해주세요.');
+                    console.log('check..');
+                    return false;
+                } else {
+                    let confirmed = confirm('정말 삭제하시겠습니까?');
+                    if (!confirmed) {
+                        return false;
+                    }
+                }
+            };
+
+            selectAllCheckbox.addEventListener('change', function () {
+                for (let i = 0; i < checkBoxes.length; i++) {
+                    checkBoxes[i].checked = selectAllCheckbox.checked;
+                }
+            });
+
+        }
+
+        //🎈카테고리별 조회
+        function selectCategory() {
+            const button = event.target; // select
+            const buttonValue = button.value; // select 값
+
+            console.log("buttonValue : " + buttonValue)
+            if(buttonValue === 'all') {
+                location.href = "/lotteon/admin/cs/notice/list";
+            } else {
+                location.href = "/lotteon/admin/cs/notice/list?cate1=" + buttonValue;
+            }
+
+        }
+
+
+    </script>
+
+
+    <div id="noticeList" class="container-fluid board">
+
+        <!-- Page Heading -->
+        <h1 class="h3 mb-2 text-gray-800">CS 게시판관리</h1>
+        <p class="mb-4"></p>
+
+        <!-- DataTales Example -->
+        <div class="card mb-4">
+            <div class="card-header py-3" >
+                <h6 class="m-0 font-weight-bold">공지사항</h6>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+
+                    <form th:action="@{/admin/cs/search}" method="get">
+                        <div id="searchBox">
+                                <select name="searchOption" id="searchOption" onchange="selectCategory()">
+                                    <option value="all">전체</option>
+                                    <option value="10">고객서비스</option>
+                                    <option value="11">안전거래</option>
+                                    <option value="12">위해상품</option>
+                                    <option value="13">이벤트당첨</option>
+                                </select>
+                        </div><!--검색박스 end-->
+                    </form>
+
+                        <form th:action="@{/admin/cs/notice/delete}" method="post">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                <tr class="tableTitle">
+                                    <th>
+                                        <input type="checkbox" name="all">
+                                    </th>
+                                    <th>번호</th>
+                                    <th>유형</th>
+                                    <th>제목</th>
+                                    <th>작성일</th>
+                                    <th>관리</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="noticeDTOS: ${noticeDTOS}">
+                                    <td>
+                                        <input type="checkbox" name="checkbox" th:value="${noticeDTOS.noticeno}">
+                                    </td>
+                                    <td>[[${noticeDTOS.noticeno}]]</td>
+                                    <td th:text="'['+ ${noticeDTOS.c2name} + ']'"></td>
+                                    <td>
+                                        <a th:href="@{/admin/cs/notice/view(noticeno=${noticeDTOS.noticeno}, cate2=${noticeDTOS.cate2})}">[[${noticeDTOS.title}]]</a>
+                                    </td>
+                                    <td th:text="${#temporals.format(noticeDTOS.rdate, 'yyyy-MM-dd')}"></td>
+                                    <td>
+                                        <a th:href="@{/admin/cs/notice/delete(noticeno=${noticeDTOS.noticeno})}" id="delete">[삭제]</a>
+                                        <a th:href="@{/admin/cs/notice/modify(noticeno=${noticeDTOS.noticeno})}">[수정]</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div>
+                                <input type="submit" id="delBtn" value="선택삭제">
+                                <a th:href="@{/admin/cs/notice/write}" class="btnSubmit">글등록</a>
+                            </div>
+                        </form>
+                </div>
+            </div><!--card_body end-->
+
+                <div class="pagination page">
+                    <th:block th:if="${pageGroupStart > 1}" th:class="page-item">
+                        <a th:href="@{/admin/cs/notice/list(pg=${pageGroupStart - 1})}" th:class="page-link prev">이전</a>
+                    </th:block>
+
+                    <th:block th:each="num:${#numbers.sequence(pageGroupStart, pageGroupEnd)}" th:class="page-item">
+                        <a th:href="@{/admin/cs/notice/list(pg=${num}, cate1=${cate1})}" th:classappend="${num == currentPage} ? 'current num' : 'num'" th:class="page-link">[[${num}]]</a>
+                    </th:block>
+
+                    <th:block th:if="${pageGroupEnd < lastPageNum}" th:class="page-item">
+                        <a th:href="@{/admin/cs/notice/list(pg=${pageGroupEnd + 1})}" th:class="page-link next">다음</a>
+                    </th:block>
+                </div>
+                <input type="hidden" th:value="${pageGroupStart}">
+                <input type="hidden" th:value="${pageGroupEnd}">
+                <input type="hidden" th:value="${pageStartNum}">
+
+
+
+        </div>
+
+    </div>
+
+
+
+    <script th:src="@{/admin/css/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/admin/css/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/admin/css/vendor/jquery-easing/jquery.easing.min.js}"></script>
+    <script th:src="@{/admin/js/sb-admin-2.min.js}"></script>
+</main>
+
+</html>

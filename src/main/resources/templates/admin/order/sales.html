@@ -1,0 +1,177 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/adminLayout}">
+
+
+<head>
+    <title>롯데온::2조 관리자 매출현황</title>
+    <link th:href="@{/admin/css/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" type="text/css">
+    <link
+            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+    <link th:href="@{/admin/css/sb-admin-2.min.css}" rel="stylesheet">
+    <style>
+        .prodImg {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+        }
+        #searchOption {
+            width: 90px;
+            height: 30px;
+        }
+
+        #prod_search {
+            width: 200px;
+            height: 30px;
+            border: 1px solid #777777;
+            font-size: 13px;
+            outline: none;
+            border-radius: 5px;
+        }
+        .searchBtn {
+            border: none;
+        }
+        .searchBtn img {
+            width: 23px;
+            height: 23px;
+            position: relative;
+            right: 40px;
+        }
+
+    </style>
+    <script th:inline="javascript">
+        window.onload = function (){
+
+            const chartList = document.getElementsByClassName('chartList');
+
+            const monthSales = [[${monthSales}]];
+            const weekSales = [[${weekSales}]];
+            let lineChart;
+            const chartName = document.getElementById('chartName');
+            const count = document.getElementById('count');
+            const price = document.getElementById('price');
+            const dropdown_item = document.getElementsByClassName('dropdown-item');
+
+            for(let i = 0; i < dropdown_item.length; i++){
+                dropdown_item[i].onclick = function (e) {
+                    e.preventDefault();
+                    const value = e.target.getAttribute('data-value');
+
+                    if (value === 'month'){
+                        setChart(monthSales);
+                        chartName.innerText = "월간 주문금액"
+                    }else if(value === 'week'){
+                        setChart(weekSales);
+                        chartName.innerText = "주간 주문금액";
+                    }
+                    document.getElementById(value).style.display = '';
+                }
+            }
+            function setChart(salesList){
+                for(let i = 0; i < chartList.length; i++){
+                    chartList[i].style.display = 'none';
+                }
+                const ctx = document.getElementById("myAreaChart");
+                const data = [];
+                const labels = [];
+
+                salesList.forEach(function (sales) {
+                    data.push(sales.price);
+                    labels.push(sales.period);
+                });
+                lineChart = drawChart(ctx, data, labels, lineChart);
+            }
+
+            setChart(monthSales);
+            chartList[0].style.display = '';
+        }
+    </script>
+</head>
+
+<main layout:fragment="content">
+    <div class="col-xl col-lg-7">
+        <div class="card shadow mb-4">
+            <!-- Card Header - Dropdown -->
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 id="chartName" class="m-0 font-weight-bold" style="color: #ffffff">월간 주문금액</h6>
+                <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                         aria-labelledby="dropdownMenuLink">
+                        <div class="dropdown-header">Dropdown Header:</div>
+                        <a class="dropdown-item" href="#" data-value="month">월간 주문금액</a>
+                        <a class="dropdown-item" href="#" data-value="week">주간 주문금액</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Card Body -->
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="myAreaChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="chartInfo" class="container-field">
+        <table id="month" class="chartList">
+            <thead>
+            <tr>
+                <th>기간</th>
+                <th>매출</th>
+                <th>판매량</th>
+                <th>전달대비(￦)</th>
+                <th>전달대비(%)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="data, dataState:${monthSales}">
+                <td>[[${data.period}]]</td>
+                <td>[[${data.price}]]</td>
+                <td>[[${data.pcount}]]</td>
+                <td th:if="${dataState.index} > 0">[[${data.price - monthSales[dataState.index - 1].price}]]￦</td>
+                <td th:if="${dataState.index} == 0"></td>
+                <td th:if="${dataState.index} > 0">[[(${data.price} - ${monthSales[dataState.index - 1].price}) / ${monthSales[dataState.index - 1].price} * 100]]%</td>
+                <td th:if="${dataState.index} == 0"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table id="week" class="chartList">
+            <thead>
+            <tr>
+                <th>기간</th>
+                <th>매출</th>
+                <th>판매량</th>
+                <th>전주대비(￦)</th>
+                <th>전주대비(%)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="data, dataState:${weekSales}">
+                <td>[[${data.period}]]</td>
+                <td>[[${data.price}]]</td>
+                <td>[[${data.pcount}]]</td>
+                <td th:if="${dataState.index} > 0">[[${data.price - weekSales[dataState.index - 1].price}]]￦</td>
+                <td th:if="${dataState.index} == 0"></td>
+                <td th:if="${dataState.index} > 0">[[(${data.price} - ${weekSales[dataState.index - 1].price}) / ${weekSales[dataState.index - 1].price} * 100]]%</td>
+                <td th:if="${dataState.index} == 0"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script th:src="@{/admin/css/vendor/chart.js/Chart.min.js}"></script>
+    <script th:src="@{/admin/js/demo/chart-area-demo.js}"></script>
+
+    <script th:src="@{/admin/css/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/admin/css/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/admin/css/vendor/jquery-easing/jquery.easing.min.js}"></script>
+    <script th:src="@{/admin/js/sb-admin-2.min.js}"></script>
+</main>
+</html>

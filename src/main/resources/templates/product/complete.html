@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
+      layout:decorate="~{/layout/UserLayout}">
+<head>
+  <style>
+    header > .logo > div > form > button {
+      top: 5px;
+    }
+  </style>
+</head>
+
+
+<section class="complete" layout:fragment="content">
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      updateTotalSum();  // 페이지 로드 시 합계 업데이트
+
+      // 전체 선택 체크박스 이벤트 핸들러 추가
+      const selectAllCheckbox = document.getElementById('selectAll');
+      selectAllCheckbox.addEventListener('change', function() {
+        toggleSelectAll(this);
+      });
+
+      // 체크박스 변경 시 합계 업데이트
+      document.querySelectorAll('input[name="productSelect"]').forEach(checkbox => {
+        checkbox.addEventListener('change', updateTotalSum);
+      });
+
+      window.submitDeleteForm = function() {
+        const checkboxes = document.querySelectorAll('input[name="productSelect"]:checked');
+        if (checkboxes.length === 0) {
+          alert('삭제할 상품을 선택하세요.');
+          return;
+        }
+        const pnos = Array.from(checkboxes).map(cb => parseInt(cb.value));
+        fetch('/lotteon/cart/delete', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ pnos: pnos })
+        })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    alert('선택한 상품이 삭제되었습니다.');
+                    window.location.reload(); // 페이지 새로 고침
+                  } else {
+                    alert('상품 삭제에 실패했습니다.');
+                  }
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  alert('삭제 처리 중 오류가 발생했습니다.');
+                });
+      }
+    });
+  </script>
+
+  <!-- 제목, 페이지 네비게이션 -->
+  <nav>
+    <h1>주문완료</h1>
+    <p>HOME > 장바구니 > 주문결제 > <strong>주문완료</strong></p>
+  </nav>
+
+  <!-- 완료 멘트 -->
+  <article class="message">
+    <h2>고객님의 주문이 정상적으로 완료되었습니다.<i class="far fa-smile"></i></h2>
+    <p>즐거운 쇼핑이 되셨습니까? 항상 고객님을 최우선으로 생각하는 롯데ON이 되겠습니다.</p>
+  </article>
+
+  <!-- 상품정보 -->
+  <article class="info">
+    <h1>상품 정보</h1>
+    <table border="0" >
+      <tr>
+        <th>상품명</th>
+        <th>상품금액</th>
+        <th>할인율</th>
+        <th>수량</th>
+        <th>주문금액</th>
+      </tr>
+      <tr th:each="detail : ${ordersDTO}">
+        <td>
+          <article>
+            <img th:src="@{|/product/${detail.cate}/${detail.mainimg}|}" alt="상품 이미지">
+            <div>
+              <h2 th:text="${detail.pname}">상품명</h2>
+              <p th:text="${detail.options}">옵션</p>
+            </div>
+          </article>
+        </td>
+        <td th:text="${#numbers.formatInteger(detail.price, 3, 'COMMA')}">17,000원</td>
+        <td th:text="${detail.discount + '%'}">1,000원</td>
+        <td th:text="${detail.pcount}">1</td>
+        <td th:text="${#numbers.formatInteger((detail.price - (detail.price * detail.discount / 100)) * detail.pcount, 3, 'COMMA')}">16,000원</td>
+
+
+        <!-- 주문 요약 -->
+      <tr class="total">
+        <td colspan="4"></td>
+        <td>
+          <table border="0">
+            <tr>
+              <td>총 상품금액</td>
+              <td><span th:text="${#numbers.formatInteger(totalAmount, 3, 'COMMA')}">0</span>원</td>
+            </tr>
+            <tr>
+              <td>총 할인금액</td>
+              <td><span th:text="${#numbers.formatInteger(totalDiscount, 3, 'COMMA')}">0</span>원</td>
+            </tr>
+            <tr>
+              <td>배송비</td>
+              <td><span th:text="${#numbers.formatInteger(deliveryFee, 3, 'COMMA')}">0</span>원</td>
+            </tr>
+            <tr>
+              <td>총 결제금액</td>
+              <td><span th:text="${#numbers.formatInteger(finalPrice, 3, 'COMMA')}">0</span>원</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+    </table>
+  </article>
+
+  <!-- 주문 정보 -->
+  <article class="order">
+    <h1>주문 정보</h1>
+    <table border="0">
+      <tbody>
+      <tr>
+        <td>주문번호</td>
+        <td th:text="${ordersDTO[0].ono}">2008101324568</td>
+        <td rowspan="3">총 결제금액</td>
+        <td rowspan="3"><span th:text="${#numbers.formatInteger(finalPrice, 3, 'COMMA')}">0</span>원</td>
+      </tr>
+      <tr>
+        <td>결제방법</td>
+        <td th:text="${ordersDTO[0].payment}">신용카드</td>
+      </tr>
+      <tr>
+        <td>주문자/연락처</td>
+        <td th:text="${ordersDTO[0].hp}">홍길동/010-1234-1234</td>
+      </tr>
+      </tbody>
+    </table>
+  </article>
+
+  <!-- 배송 정보 -->
+  <article class="delivery">
+    <h1>배송 정보</h1>
+    <table border="0">
+      <tr>
+        <td>수취인</td>
+        <td th:text="${ordersDTO[0].receiver}">홍길동</td>
+        <td>주문자 정보</td>
+      </tr>
+      <tr>
+        <td>연락처</td>
+        <td th:text="${ordersDTO[0].hp}">010-1234-1234</td>
+        <td rowspan="2" th:text="|${ordersDTO[0].addr1}, ${ordersDTO[0].addr2}|">
+          부산광역시 강남구 대연동 123 10층
+        </td>
+      </tr>
+    </table>
+  </article>
+
+  <!-- 주의 사항 -->
+  <article class="alert">
+    <h1>꼭 알아두세요.</h1>
+    <ul>
+      <li><span>롯데ON은 통신판매중개자이며 통신판매의 당사자가 아닙니다. 따라서 롯데ON은 상품, 거래정보 및 거래에 대하여 책임을 지지 않습니다.</span></li>
+      <li><span>구매주문내역, 배송상태 확인, 구매영수증 출력, 구매취소/반품/교환은 사이트 상단의 주문/배송조회에서 확인 할 수 있습니다.</span></li>
+      <li><span>고객님의 주문이 체결된 후 상품품절 및 단종 등에 의해 배송이 불가능할 경우, 전자상거래등에서의 소비자 보호에 관한 법률 제15조 2항에 의거하여 3영업일(공휴일 제외) 이내에 자동으로 취소될 수 있으며, 이 경우 취소 안내 메일이 고객님께 발송되오니 양지 바랍니다.</span></li>
+      <li><span>극히 일부 상품에 대해 수량부족, 카드결제승인 오류등의 사례가 간혹 있을 수 있으니 `나의쇼핑정보`에서 다시 한번 확인해 주세요.</span></li>
+      <li><span>현금잔고로 구매하셨을 경우, 나의 쇼핑정보에서 입금확인이 되었는지를 다시 한번 확인해 주세요.</span></li>
+      <li><span>배송주소를 추가하거나 변경, 삭제 등의 관리는 `나의쇼핑정보 > 나의정보` 에서 가능합니다.</span></li>
+    </ul>
+  </article>
+
+</section>
+<!-- 결제완료 페이지 끝 -->
+</html>

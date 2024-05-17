@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.lotteon.mapper.ProductMapper">
+
+
+    <!--product_list-->
+    <select id="selectProductsByScore" resultType="kr.co.lotteon.dto.ProductDTO">
+        SELECT a.*, b.mainImg
+        FROM `product` AS a
+        LEFT JOIN `productimg` AS b ON a.pno = b.pno
+        WHERE b.mainImg IS NOT NULL AND a.deldate IS NULL AND a.pno in (
+            SELECT r.pno AS rating
+            FROM `review` AS r
+            INNER JOIN `product` AS p ON p.pno = r.pno
+            GROUP BY r.pno
+            ORDER BY rating DESC
+        )
+        ORDER BY a.rdate DESC, a.pno ASC
+        LIMIT 8
+    </select>
+
+    <select id="selectProductsByNewest" resultType="kr.co.lotteon.dto.ProductDTO">
+        SELECT a.*, b.mainImg
+        FROM `product` AS a
+        LEFT JOIN `productimg` AS b ON a.pno = b.pno
+        WHERE b.mainImg IS NOT NULL AND a.deldate IS NULL
+        ORDER BY a.rdate DESC, a.pno ASC
+        LIMIT 8
+    </select>
+
+    <select id="selectProductsByHit" resultType="kr.co.lotteon.dto.ProductDTO">
+        SELECT a.*, b.mainImg
+        FROM `product` AS a
+        LEFT JOIN `productimg` AS b ON a.pno = b.pno
+        WHERE b.mainImg IS NOT NULL AND a.deldate IS NULL
+        ORDER BY a.hit DESC, a.pno ASC
+        LIMIT 8
+    </select>
+
+    <select id="selectProductsByOrder" resultType="kr.co.lotteon.dto.ProductDTO">
+        SELECT a.*, b.mainImg
+        FROM `product` AS a
+        LEFT JOIN `productimg` AS b ON a.pno = b.pno
+        WHERE b.mainImg IS NOT NULL AND a.deldate IS NULL
+        AND a.pno in (
+            SELECT od.pno
+            FROM `orderdetail` AS od
+            INNER JOIN `product` AS p ON p.pno = od.pno
+            GROUP BY od.pno
+            ORDER BY pcount DESC
+        )
+        ORDER BY a.rdate DESC, a.pno ASC
+        LIMIT 5
+    </select>
+
+    <select id="selectProductsByDiscount" resultType="kr.co.lotteon.dto.ProductDTO">
+        SELECT a.*, b.mainImg
+        FROM `product` AS a
+        LEFT JOIN `productimg` AS b ON a.pno = b.pno
+        WHERE b.mainImg IS NOT NULL AND a.deldate IS NULL
+        ORDER BY a.discount DESC, a.pno ASC
+        LIMIT 8
+    </select>
+
+    <!-- 장바구니 상품 정보 조회 -->
+    <select id="selectCartWithProductsByUid" resultType="kr.co.lotteon.dto.ProductDTO">
+        SELECT a.pno, a.pname, a.company, a.price, a.cate, a.info, a.discount, a.point, a.deliprice, b.mainImg, c.pcount, c.options
+        FROM `cart` AS c
+        JOIN `product` AS a ON c.pno = a.pno
+        LEFT JOIN `productimg` AS b ON a.pno = b.pno
+        WHERE c.uid = #{uid} AND a.deldate IS NULL
+        ORDER BY c.cno DESC
+    </select>
+
+    <!-- 상품 상세 정보 조회 -->
+    <select id="selectProductWithImagesById" resultType="kr.co.lotteon.dto.ProductDTO">
+        SELECT p.*, img.mainimg, img.subimg, img.detailimg
+        FROM product p
+        LEFT JOIN productimg img ON p.pno = img.pno
+        WHERE p.pno = #{pno} AND p.deldate IS NULL
+    </select>
+
+    <!-- 상품 검색 -->
+    <select id="searchProducts" resultType="kr.co.lotteon.dto.ProductDTO">
+        SELECT p.*, img.mainImg, img.subImg, img.detailImg
+        FROM product p
+        LEFT JOIN productimg img ON p.pno = img.pno
+        WHERE p.deldate IS NULL
+        <if test="search != null and search != ''">
+            AND p.pname LIKE CONCAT('%', #{search}, '%')
+        </if>
+        <if test="minPrice != null">
+            AND p.price >= #{minPrice}
+        </if>
+        <if test="maxPrice != null">
+            AND p.price &lt;= #{maxPrice}
+        </if>
+        <if test="cate > 0">
+            AND p.cate = #{cate}
+        </if>
+        ORDER BY p.rdate DESC
+    </select>
+
+    <!-- 상품 검색 갯수 -->
+    <select id="countSearchProducts" resultType="int">
+        SELECT COUNT(*)
+        FROM product p
+        LEFT JOIN productimg img ON p.pno = img.pno
+        WHERE p.deldate IS NULL
+        <if test="search != null and search != ''">
+            AND p.pname LIKE CONCAT('%', #{search}, '%')
+        </if>
+        <if test="minPrice != null">
+            AND p.price >= #{minPrice}
+        </if>
+        <if test="maxPrice != null">
+            AND p.price &lt;= #{maxPrice}
+        </if>
+        <if test="cate != null and cate != ''">
+            AND p.cate = #{cate}
+        </if>
+    </select>
+
+
+</mapper>

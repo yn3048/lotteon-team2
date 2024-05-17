@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.lotteon.mapper.UserMapper">
+
+    <select id="selectUser" resultType="kr.co.lotteon.dto.UserDTO">
+        SELECT * FROM `user` AS u
+        JOIN `userdetail` AS ud ON u.uid = ud.uid
+        WHERE u.uid = #{uid}
+    </select>
+
+    <select id="selectCountUser" resultType="int">
+        select count(*) from user
+            <where>
+                <if test="type == 'uid'">uid=#{value}</if>
+                <if test="type == 'nick'">nick=#{value}</if>
+                <if test="type == 'hp'">hp=#{value}</if>
+                <if test="type == 'email'">email=#{value}</if>
+            </where>
+    </select>
+
+    <insert id="insertUser">
+        insert into user set
+                        uid=#{uid},
+                        pass=#{pass},
+                        name=#{name},
+                        nick=#{nick},
+                        email=#{email},
+                        hp=#{hp},
+                        role=#{role},
+                        zip=#{zip},
+                        addr1=#{addr1},
+                        addr2=#{addr2},
+                        regip=#{regip},
+                        sms=#{sms},
+                        regDate=NOW()
+    </insert>
+
+
+    <update id="updateUserZip">
+        update `user` set
+                    zip=#{zip},
+                    addr1=#{addr1},
+                    addr2=#{addr2}
+                    where uid = #{uid}
+    </update>
+
+    <select id="selectSeller" resultType="kr.co.lotteon.dto.UserDTO">
+        select * from `user` as a
+        join `seller` as b on a.uid = b.uid
+        where a.uid = #{uid}
+    </select>
+
+</mapper>

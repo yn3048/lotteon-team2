@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.lotteon.mapper.OrdersMapper">
+
+    <select id="selectOrders" resultType="kr.co.lotteon.dto.OrdersDTO">
+        SELECT o.*, p.pno, p.cate, p.pname, p.company, pi.mainimg, od.pcount, od.options, od.price
+        FROM `orders` AS o
+        JOIN `orderdetail` AS od ON o.ono = od.ono
+        JOIN `product` AS p ON p.pno = od.pno
+        JOIN `productimg` AS pi ON p.pno = pi.pno
+        WHERE o.uid = #{uid}
+        ORDER BY o.odate DESC
+    </select>
+
+
+    <select id="selectAllOrders" resultType="kr.co.lotteon.dto.OrdersDTO">
+        SELECT o.*, p.pno,p.uid, p.cate, p.pname, p.company, pi.mainimg, od.pcount, od.options, od.price  FROM `orders` AS o
+        JOIN `orderdetail` AS od ON o.ono = od.ono
+        JOIN `product` AS p ON p.pno = od.pno
+        JOIN `productimg` AS pi ON p.pno = pi.pno
+    </select>
+
+    <select id="selectOrdersGroup" resultType="kr.co.lotteon.dto.OrdersDTO">
+        SELECT od.ono, o.odate, COUNT(od.ono) AS `count`, o.total ,ANY_VALUE(p.pname) AS pname
+        FROM `orderdetail` AS od
+        JOIN `orders` AS o ON o.ono = od.ono
+        JOIN `product` AS p ON od.pno = p.pno
+        WHERE o.uid = #{uid}
+        GROUP BY od.ono
+    </select>
+
+    <select id="selectOrdersGroupByDate" resultType="kr.co.lotteon.dto.OrdersDTO">
+        SELECT od.ono, o.odate, COUNT(od.ono) AS `count`, o.total ,ANY_VALUE(p.pname) AS pname
+        FROM `orderdetail` AS od
+        JOIN `orders` AS o ON o.ono = od.ono
+        JOIN `product` AS p ON od.pno = p.pno
+        WHERE o.uid = #{uid} AND o.odate BETWEEN #{searchDate} AND #{nowDate}
+        GROUP BY od.ono
+    </select>
+
+    <select id="selectOrderDetails" resultType="kr.co.lotteon.dto.OrdersDTO">
+        SELECT o.*, p.pno, p.cate, p.pname, p.company, pi.mainimg, od.pcount, od.options, od.price, p.discount, p.deliprice
+        FROM `orders` AS o
+        JOIN `orderdetail` AS od ON o.ono = od.ono
+        JOIN `product` AS p ON p.pno = od.pno
+        JOIN `productimg` AS pi ON p.pno = pi.pno
+        WHERE o.ono = #{ono}
+    </select>
+
+    <select id="selectPoint" resultType="kr.co.lotteon.dto.OrdersDTO">
+        select * from `orders` where uid = #{uid}
+    </select>
+
+    <select id="selectReview" resultType="kr.co.lotteon.dto.ReviewDTO">
+        SELECT DISTINCT od.`options`, r.`uid`, r.content, r.rating, r.redate FROM `orders` AS o
+        JOIN `orderdetail` AS od ON o.ono = od.ono
+        JOIN `review` AS r ON r.pno = od.pno
+        WHERE r.pno = #{pno}
+    </select>
+
+    <select id="reviewAverage" resultType="java.lang.Double">
+        SELECT AVG(rating) as averageRating FROM review WHERE pno = #{pno};
+    </select>
+
+    <select id="selectReviewsByUid" resultType="kr.co.lotteon.dto.ReviewDTO">
+        SELECT r.rno, r.uid, r.content, r.rating, r.redate,
+        p.pno, p.pname
+        FROM review r
+        JOIN product p ON r.pno = p.pno
+        WHERE r.uid = #{uid}
+        ORDER BY r.redate desc
+    </select>
+
+</mapper>
