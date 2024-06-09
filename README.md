@@ -1,5 +1,9 @@
 <h1>LotteON 쇼핑몰 프로젝트</h1>
-<img src="" />
+<img src="https://github.com/yn3048/lotteon-team2/assets/154954272/d112540f-3542-48bd-a121-495aa6837da1" width="400" height="600"/><br>
+<img src="https://github.com/yn3048/lotteon-team2/assets/154954272/d9675849-fa8f-4289-92ca-3d91b0e2e9a4" align="center" width="48%" height="300" margin-right="10" />
+<img src="https://github.com/yn3048/lotteon-team2/assets/154954272/cd68e20b-39fe-474c-a9d0-1c4155b4656d" align="center" width="48%" height="300" />
+
+
 <h2>제작기간</h2>
 
 > <h4>2024.04.17 ~ 2024.05.17(1달)</h4>
