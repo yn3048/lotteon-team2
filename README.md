@@ -13,12 +13,19 @@
 |사용대상|사용자, 판매자, 관리자|
 
 <h2>사용 기술</h2>
-1. Front-End
+
+<h3>1. Front-End</h3>
 
 ><h4>HTML</h4>
 ><h4>CSS</h4>
 ><h4>Thymeleaf</h4>
 ><h4>JavaScript</h4>
 
+<h3>2. Back-end</h3>
+
+><h4>SpringBoot</h4>
+><h4>JPA</h4>
+><h4>QueryDSL</h4>
+><h4>MyBatis</h4>
 
 
