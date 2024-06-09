@@ -34,6 +34,11 @@
 ><h4>MySQL</h4>
 <br>
 
-<h2>ERD</h2>
+<h2>ERD 설계</h2>
+
+><details>
+>  <summary>ERD</summary>
+>  <img src="https://github.com/yn3048/portfolio/assets/154954272/89e0cf7a-4118-4e66-b05c-4b56755564fd" width:900 height:600>
+></details>
 
 
