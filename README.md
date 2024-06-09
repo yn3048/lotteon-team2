@@ -1,8 +1,9 @@
 <h1>LotteON 쇼핑몰 프로젝트</h1>
-<img src="https://github.com/yn3048/lotteon-team2/assets/154954272/d112540f-3542-48bd-a121-495aa6837da1" width="400" height="600"/><br>
-<img src="https://github.com/yn3048/lotteon-team2/assets/154954272/d9675849-fa8f-4289-92ca-3d91b0e2e9a4" width="48%" height="300" margin-right="10" />
-<img src="https://github.com/yn3048/lotteon-team2/assets/154954272/cd68e20b-39fe-474c-a9d0-1c4155b4656d"  width="48%" height="300" />
-<img src="https://github.com/yn3048/lotteon-team2/assets/154954272/4b1a127f-0445-445b-bde5-5ee78ebd5697">
+<img src="https://github.com/yn3048/lotteon-team2/assets/154954272/301e3c85-2fd1-4216-817f-d8675a94d874" width="48%" height="300"/>
+<img src="https://github.com/yn3048/lotteon-team2/assets/154954272/cd68e20b-39fe-474c-a9d0-1c4155b4656d"  width="48%" height="300" /><br>
+<br>
+<img src="https://github.com/yn3048/lotteon-team2/assets/154954272/d9675849-fa8f-4289-92ca-3d91b0e2e9a4" width="48%" height="300"/>
+<img src="https://github.com/yn3048/lotteon-team2/assets/154954272/4b1a127f-0445-445b-bde5-5ee78ebd5697"  width="48%" height="300">
 
 
 
